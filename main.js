@@ -19,7 +19,7 @@ async function handleFileOpen() {
     if (!canceled) {
       const filePath = filePaths[0];
       const fileStat = fs.statSync(filePath);
-      const content = fs.readFileSync(filePath);
+      const content = fs.readFileSync(filePath, 'utf8');
       return {
         filePath: filePath,
         fileSize: fileStat.size,

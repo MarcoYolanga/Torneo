@@ -13,8 +13,11 @@ var glo = {
     db: {
         data: {},
         load: function (data) {
+            console.log('json parse', data, _json_decode(data));
             this.data = _json_decode(data);
             this.val('last-open', millis());
+
+            glo.squadre.render();
         },
         save: function() {
             window.localAPI.saveFile(glo.saveFile, _json_encode(this.data));
@@ -39,6 +42,7 @@ var glo = {
         form: null,
         table: null,
         add: function (squadra) {
+            //TODO: check dupl
             console.log('adding ', squadra);
             const row = $('<tr><td>'+squadra.nome+'</td><td><button class="btn btn-danger btn-sm btn-delete">X</button></td></tr>');
             if(!squadra.id){
@@ -53,10 +57,10 @@ var glo = {
         },
         render: function () {
             const squadre = this.val();
-            
-                for(const squadra of squadre){
-                    this.add(squadra);
-                }
+            this.table.find("tbody tr").remove();
+            for(const squadra of squadre){
+                this.add(squadra);
+            }
             
         },
         save: function () {
@@ -64,7 +68,7 @@ var glo = {
         },
         read: function () {
             let data = [];
-            this.table.find('tr').each(function(){
+            this.table.find('tbody tr').each(function(){
                 const row = $(this);
                 data.push(row.data('squadra'));
             });
@@ -72,7 +76,7 @@ var glo = {
         },
         val: function(setVal) {
             if(setVal === undefined){
-                return _json_decode(glo.db.val('squadre'));
+                return _json_decode(glo.db.val('squadre'), []);
             }
             glo.db.val('squadre', _json_encode(setVal));
         }
@@ -86,10 +90,10 @@ window.addEventListener('load', () => {
     glo.squadre.form.el.on('submit', function(){
         glo.squadre.add(glo.squadre.form.read());
         glo.squadre.save();
-        glo.squadre.form.el.reset();
+        glo.squadre.form.el[0].reset();
     });
 
-    glo.squadre.render();
+    
 
     let page = $('.page[data-page="select-save"]');
     page.find('.btn-newfile').on('click', async function () {
@@ -127,7 +131,8 @@ window.addEventListener('load', () => {
         }
        
         glo.setSaveFile(savePathSelection.filePath);
-        glo.db.load(savePathSelection.content);
+        console.log("CONTENT", savePathSelection);
+        glo.db.load(savePathSelection.fileContent);
         rlib.setPage('game');
     });
 
