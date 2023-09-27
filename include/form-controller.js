@@ -34,6 +34,27 @@ export function FormController(el){
             });
             return payload;
         },
+        write: (payload) => {
+            if(!payload){
+                payload = {};
+            }
+            el.find('.form-control').each(function(){
+                const inp = $(this);
+                const name = inp.attr('name');
+                let value = payload[name];
+                //convert bool
+                if(value === true){
+                    value = 'true';
+                }
+                if(value === false){
+                    value = 'false';
+                }
+                if(value === undefined){
+                    value = '';
+                }
+                inp.val(value);
+            });
+        },
         setLoading: function(toggle) {
             this.el.find('button[type="submit"], button[type="button"]').prop('disabled', toggle);
         }

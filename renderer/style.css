@@ -105,3 +105,7 @@ body.drag-and-drop-overlay-visible #drag-and-drop-overlay{
 .page:not(.show){
     display: none;
 }
+.squadra{
+    display: block;
+    margin: 5px 10px;
+}

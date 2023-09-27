@@ -18,6 +18,7 @@ var glo = {
             this.val('last-open', millis());
 
             glo.squadre.render();
+            glo.torneo.load();
         },
         save: function() {
             window.localAPI.saveFile(glo.saveFile, _json_encode(this.data));
@@ -41,6 +42,7 @@ var glo = {
     squadre: {
         form: null,
         table: null,
+        listCache: null,
         add: function (squadra) {
             //TODO: check dupl
             console.log('adding ', squadra);
@@ -65,6 +67,7 @@ var glo = {
         },
         save: function () {
             this.val(this.read());
+            this.listCache = null;
         },
         read: function () {
             let data = [];
@@ -79,8 +82,124 @@ var glo = {
                 return _json_decode(glo.db.val('squadre'), []);
             }
             glo.db.val('squadre', _json_encode(setVal));
+        },
+        list: function(){
+            if(!this.listCache){
+                const squadre = this.val();
+                let map = {};
+                for(const squadra of squadre){
+                    map[squadra.id] = squadra;
+                }
+                this.listCache = map;
+            }
+            return this.listCache;
+        },
+    },
+    torneo: {
+        fasi: ['gironi-andata', 'gironi-ritorno', 'eliminatorie'],
+        data: {},
+        val: function(setVal) {
+            if(setVal === undefined){
+                return _json_decode(glo.db.val('torneo'));
+            }
+            glo.db.val('torneo', _json_encode(setVal));
+        },
+        start: function() {
+            this.data = {
+                options: {},
+                partite: [], //indexFase => [partite]
+            };
+            const formOptions = this.nodes.startTorneo.read();
+            if(!formOptions.gironi){
+                throw new Error("Can't start torneo without config");
+            }
+            this.data.options = formOptions;
+            this.setFase(0);
+            
+            //dividi i gironi
+            const squadre = glo.squadre.list()
+            const nSquadre = Object.keys(squadre).length;
+            const nGironi = parseInt(this.data.options.gironi);
+            const nPerGirone = Math.floor(nSquadre / nGironi);
+            this.data.gironi = [];
+            let indexGirone = 0;
+            for(const idSquadra in squadre){
+                const squadra = squadre[idSquadra];
+                if(!this.data.gironi[indexGirone]){
+                    this.data.gironi[indexGirone] = [];
+                }
+                this.data.gironi[indexGirone].push(squadra);
+                if(this.data.gironi[indexGirone].length >= nPerGirone){
+                    indexGirone++;
+                }
+            }
+            //se l'ultimo girone è meno del necessario spalma i giocatori
+            if(this.data.gironi[this.data.gironi.length - 1].length < nPerGirone){
+                let girone = this.data.gironi.pop();
+                indexGirone = 0;
+                for(const squadra of girone){
+                    this.data.gironi[indexGirone % this.data.gironi.length].push(squadra);
+                    indexGirone++;
+                }
+            }
+
+
+            this.render();
+            this.save();
+        },
+        setFase: function(indexFase){
+            this.data.step = 0;
+            this.data.fase = indexFase;
+        },
+        load: function (){
+            this.data = this.val();
+            if(typeof this.data.step === 'undefined'){
+                console.error("Loaded invalid torneo data");
+                this.start();
+                return;
+            }
+
+            this.nodes.startTorneo.write(this.data.options);
+
+            this.render();
+        },
+        render: function(){
+            //stato base dei gironi
+            this.nodes.renderGironi.html("");
+            for(const girone of this.data.gironi){
+                const col = $('<div class="col-12 col-md-3"></div>');
+                const item = $('<div class="girone"><div class="classifica"></div><div class="match"></div></div>');
+                const classifica = item.find('.classifica');
+                const match = item.find('.match');
+                for(const squadra of girone){
+                    const squadraNode = $('<div data-id="'+squadra.id+'" class="squadra badge bg-secondary">'+squadra.nome+'</div>');
+                    classifica.append(squadraNode);
+                }
+
+                col.append(item);
+                this.nodes.renderGironi.append(col);
+            }
+        },
+        save: function(){
+            this.val(this.data);
+        },
+        init: function(tab){
+            this.nodes = {
+                tab: $(tab)
+            };
+            this.nodes.faseGironi = this.nodes.tab.find('.fase-gironi');
+            this.nodes.faseEliminatorie = this.nodes.tab.find('.fase-eliminatorie');
+            this.nodes.renderGironi = this.nodes.tab.find('.fase-gironi .render-gironi');
+            this.nodes.startTorneo = FormController('#start-torneo');
+            
+            const torneo = this;
+            this.nodes.startTorneo.el.on('submit', function(){
+                torneo.start();
+            });
+            
         }
     }
+
 };
 window.addEventListener('load', () => {
     rlib.setPage('select-save');
@@ -93,6 +212,7 @@ window.addEventListener('load', () => {
         glo.squadre.form.el[0].reset();
     });
 
+    glo.torneo.init('#torneo');
     
 
     let page = $('.page[data-page="select-save"]');
