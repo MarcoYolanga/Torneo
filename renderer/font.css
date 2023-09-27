@@ -1,0 +1,47 @@
+@font-face {
+    font-family: "gotham-black";
+    font-display: auto;
+    font-fallback: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    src: url(./font/Gotham-Black.woff2) format('woff2'), url(./font/Gotham-Black.woff) format('woff'), url(./font/Gotham-Black.ttf) format('TrueType'), url(./font/Gotham-Black.eot) format('eot'), url(./font/Gotham-Black.svg) format('svg'), url(./font/Gotham-Black.otf) format('OpenType');
+}
+
+@font-face {
+    font-family: "gotham-bold";
+    font-display: auto;
+    font-fallback: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    src: url(./font/Gotham-Bold.woff2) format('woff2'), url(./font/Gotham-Bold.woff) format('woff'), url(./font/Gotham-Bold.ttf) format('TrueType'), url(./font/Gotham-Bold.eot) format('eot'), url(./font/Gotham-Bold.svg) format('svg'), url(./font/Gotham-Bold.otf) format('OpenType');
+}
+
+@font-face {
+    font-family: "gotham-book";
+    font-display: auto;
+    font-fallback: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    src: url(./font/Gotham-Book.woff2) format('woff2'), url(./font/Gotham-Book.woff) format('woff'), url(./font/Gotham-Book.ttf) format('TrueType'), url(./font/Gotham-Book.eot) format('eot'), url(./font/Gotham-Book.svg) format('svg'), url(./font/Gotham-Book.otf) format('OpenType');
+}
+
+@font-face {
+    font-family: "gotham-light";
+    font-display: auto;
+    font-fallback: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    src: url(./font/Gotham-Light.woff2) format('woff2'), url(./font/Gotham-Light.woff) format('woff'), url(./font/Gotham-Light.ttf) format('TrueType'), url(./font/Gotham-Light.eot) format('eot'), url(./font/Gotham-Light.svg) format('svg'), url(./font/Gotham-Light.otf) format('OpenType');
+}
+
+@font-face {
+    font-family: "gotham-medium";
+    font-display: auto;
+    font-fallback: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    src: url(./font/Gotham-Medium.woff2) format('woff2'), url(./font/Gotham-Medium.woff) format('woff'), url(./font/Gotham-Medium.ttf) format('TrueType'), url(./font/Gotham-Medium.eot) format('eot'), url(./font/Gotham-Medium.svg) format('svg'), url(./font/Gotham-Medium.otf) format('OpenType');
+}
+
+@font-face {
+    font-family: "gotham-ultra";
+    font-display: auto;
+    font-fallback: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+    src: url(./font/Gotham-Ultra.woff2) format('woff2'), url(./font/Gotham-Ultra.woff) format('woff'), url(./font/Gotham-Ultra.ttf) format('TrueType'), url(./font/Gotham-Ultra.eot) format('eot'), url(./font/Gotham-Ultra.svg) format('svg'), url(./font/Gotham-Ultra.otf) format('OpenType');
+}

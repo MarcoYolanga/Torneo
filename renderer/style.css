@@ -1,0 +1,107 @@
+:root{
+    --alf: #FFD100;
+    --alf-black: #282728;
+    --alf-gray: #707070;
+    --alf-red: #B43E3E;
+}
+
+body{
+    background: white;
+    color: var(--alf-black);
+    font-family: 'gotham-medium', Arial, Helvetica, sans-serif;
+    padding-bottom: 20px;
+    font-size: 15px;
+}
+h1{
+    font-family: 'gotham-black', Arial, Helvetica, sans-serif;
+}
+
+model-viewer{
+    width: 100%;
+    height: 300px;
+}
+.web-console{
+    border-radius: 5px;
+    background: var(--alf-black);
+    color: var(--alf-gray);
+    height: 200px;
+    overflow: auto;
+}
+.web-console .msg{
+    margin: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    width: 100%;
+    overflow: hidden;
+}
+.web-console .info{
+    color: var(--alf);
+}
+.web-console .error{
+    color: var(--alf-red);
+}
+.copyright{
+    font-size: 13px;
+}
+.form-group {
+    margin-top: 5px;
+}
+.text-right{
+    text-align: right;
+}
+.form-group.actions .btn:not(:last-child) {
+    margin-right: 10px;
+}
+
+.file-selector-wrap{
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#compression-stats{
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--alf-black);
+    --bs-btn-border-color: #2c2c2c;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #121212;
+    --bs-btn-hover-border-color: #121212;
+    --bs-btn-focus-shadow-rgb: 49,132,253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #121212;
+    --bs-btn-active-border-color: #121212;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #121212;
+    --bs-btn-disabled-border-color: #121212;
+}
+#drag-and-drop-overlay{
+    position: fixed;
+    opacity: .7;
+    background-color: red;
+    top: -110vh;
+    width: 100%;
+    height: 100vh;
+    left: 0;
+    transition: .6s;
+}
+body.drag-and-drop-overlay-visible #drag-and-drop-overlay{
+    top: 0;
+}
+.vertical-center-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+}
+.page:not(.show){
+    display: none;
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy"
+    content="script-src 'self' 'unsafe-inline' 'unsafe-eval';worker-src blob:" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./tooltipster/css/tooltipster.bundle.min.css">
+  <link rel="stylesheet" href="./bootstrap.min.css">
+  <link rel="stylesheet" href="./font.css">
+  <link rel="stylesheet" href="./style.css">
+  <title>Torneo</title>
+</head>
+
+<body>
+
+  <div class="page" data-page="select-save">
+    <h1>Scegli file di salvataggio</h1>
+    <button type="button" class="btn btn-primary btn-loadfile">Carica</button>
+    <button type="button" class="btn btn-primary btn-newfile">Crea</button>
+  </div>
+
+  <div class="page" data-page="game">
+    <header><button type="button" class="btn-secondary btn btn-small btn-close-file">Chiudi file</button><span
+        id="save-path"></span></header>
+
+    <div class="container mt-5">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="squadre-tab" data-bs-toggle="tab" data-bs-target="#squadre" type="button"
+            role="tab" aria-controls="squadre" aria-selected="true">Squadre</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="torneo-tab" data-bs-toggle="tab" data-bs-target="#torneo" type="button"
+            role="tab" aria-controls="torneo" aria-selected="false">Torneo</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="match-tab" data-bs-toggle="tab" data-bs-target="#match" type="button"
+            role="tab" aria-controls="match" aria-selected="false">Match</button>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="squadre" role="tabpanel" aria-labelledby="squadre-tab">
+          <table id="squadre">
+            <thead><th>Nome</th><th>Azioni</th></thead>
+            <tbody></tbody>
+          </table>
+          <form id="add-squadra" action="#" onsubmit="return false">
+            <div class="form-group">
+              <label for="nome-squadra">Nome</label>
+              <input id="nome-squadra" name="squadra" type="text" class="form-control">
+            </div>
+            <div class="form-group">
+              <button class="btn btn-sm btn-primary mt-2" type="submit">Aggiungi</button>
+            </div>
+          </form>
+        </div>
+        <div class="tab-pane fade" id="torneo" role="tabpanel" aria-labelledby="torneo-tab">...</div>
+        <div class="tab-pane fade" id="match" role="tabpanel" aria-labelledby="match-tab">...</div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <script src="./jquery-3.7.0.min.js"></script>
+  <script src="./bootstrap.bundle.min.js"></script>
+  <script src="./tooltipster/js/tooltipster.bundle.min.js"></script>
+  <script type="module" src='./model-viewer.min.js'></script>
+  <script src='../node_modules/uncaught/lib/index.js'></script>
+  <script src="./renderer-lib.js"></script>
+  <script src="./renderer.js" type="module"></script>
+</body>
+
+</html>

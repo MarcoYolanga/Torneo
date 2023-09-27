@@ -1,10 +1,8 @@
-window.addEventListener('DOMContentLoaded', () => {
-    const replaceText = (selector, text) => {
-      const element = document.getElementById(selector)
-      if (element) element.innerText = text
-    }
-  
-    for (const dependency of ['chrome', 'node', 'electron']) {
-      replaceText(`${dependency}-version`, process.versions[dependency])
-    }
-  })
+const { contextBridge, ipcRenderer } = require('electron')
+
+
+contextBridge.exposeInMainWorld('localAPI', {
+  openFile: () => ipcRenderer.invoke('dialog:openFile'),
+  choseSaveAs: (defaultPath) => ipcRenderer.invoke('dialog:saveAs', defaultPath),
+  saveFile: (path, content) => ipcRenderer.invoke('dialog:saveFile', path, content),
+})
