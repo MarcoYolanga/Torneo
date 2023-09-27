@@ -287,7 +287,7 @@ window.addEventListener('load', () => {
         }
 
         glo.setSaveFile(savePathSelection.filePath);
-        console.log("CONTENT", savePathSelection);
+        //console.log("CONTENT", savePathSelection);
         glo.db.load(savePathSelection.fileContent);
         rlib.setPage('game');
     });
