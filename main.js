@@ -4,7 +4,7 @@ const fs = require('fs');
 
 async function handleFileOpen() {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-      title: 'Seleziona il glb non compresso',
+      title: 'Seleziona il salvataggio',
       filters: [
         {
           name: "json",
@@ -32,7 +32,7 @@ async function handleFileOpen() {
 
     //console.log('handleSaveAs', defaultPath);
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-      title: 'Scegli dove salvare il glb compresso',
+      title: 'Scegli dove salvare il file',
       defaultPath: defaultPath,
       filters: [
         {

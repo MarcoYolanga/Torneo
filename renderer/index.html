@@ -8,7 +8,9 @@
     content="script-src 'self' 'unsafe-inline' 'unsafe-eval';worker-src blob:" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./tooltipster/css/tooltipster.bundle.min.css">
+
   <link rel="stylesheet" href="./bootstrap.min.css">
+  <link rel="stylesheet" href="../node_modules/toastr/build/toastr.min.css">
   <link rel="stylesheet" href="./font.css">
   <link rel="stylesheet" href="./style.css">
   <title>Torneo</title>
@@ -17,13 +19,16 @@
 <body>
 
   <div class="page" data-page="select-save">
-    <h1>Scegli file di salvataggio</h1>
-    <button type="button" class="btn btn-primary btn-loadfile">Carica</button>
-    <button type="button" class="btn btn-primary btn-newfile">Crea</button>
+    <div class="container text-center">
+
+      <h1 class="mt-5 mb-2">Scegli file di salvataggio</h1>
+      <button type="button" class="btn btn-primary btn-loadfile me-3">Carica</button>
+      <button type="button" class="btn btn-secondary btn-newfile">Crea nuovo</button>
+    </div>
   </div>
 
   <div class="page" data-page="game">
-    <header><button type="button" class="btn-secondary btn btn-small btn-close-file">Chiudi file</button><span
+    <header><button type="button" class="btn-secondary btn btn-sm btn-close-file me-3">Chiudi file</button><span
         id="save-path"></span></header>
 
     <div class="container mt-5">
@@ -43,24 +48,25 @@
       </ul>
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="squadre" role="tabpanel" aria-labelledby="squadre-tab">
-          <table id="squadre">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Azioni</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
           <form id="add-squadra" action="#" onsubmit="return false">
             <div class="form-group">
               <label for="nome-squadra">Nome</label>
-              <input id="nome-squadra" name="nome" type="text" class="form-control">
+              <input id="nome-squadra" name="nome" type="text" class="form-control" required>
             </div>
             <div class="form-group">
               <button class="btn btn-sm btn-primary mt-2" type="submit">Aggiungi</button>
             </div>
           </form>
+          <table id="squadre">
+            <!-- <thead>
+              <tr>
+                <th>Nome</th>
+                <th></th>
+              </tr>
+            </thead> -->
+            <tbody></tbody>
+          </table>
+          
         </div>
         <div class="tab-pane fade" id="torneo" role="tabpanel" aria-labelledby="torneo-tab">
           <form id="start-torneo" action="#" onsubmit="return false">
@@ -77,7 +83,7 @@
           <div id="render-torneo" class="mt-5">
             <div class="fase-gironi container-fluid">
               <div class="row render-gironi">
-                
+
               </div>
             </div>
             <div class="fase-eliminatorie">
@@ -98,6 +104,7 @@
   <script src="./tooltipster/js/tooltipster.bundle.min.js"></script>
   <script type="module" src='./model-viewer.min.js'></script>
   <script src='../node_modules/uncaught/lib/index.js'></script>
+  <script src='../node_modules/toastr/build/toastr.min.js'></script>
   <script src="./renderer-lib.js"></script>
   <script src="./renderer.js" type="module"></script>
 </body>

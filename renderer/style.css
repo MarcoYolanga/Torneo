@@ -6,7 +6,7 @@
 }
 
 body{
-    background: white;
+    background: #f3f3f3;
     color: var(--alf-black);
     font-family: 'gotham-medium', Arial, Helvetica, sans-serif;
     padding-bottom: 20px;
@@ -107,5 +107,11 @@ body.drag-and-drop-overlay-visible #drag-and-drop-overlay{
 }
 .squadra{
     display: block;
-    margin: 5px 10px;
+    margin: 3px 10px;
+    white-space: normal;
+    min-width: 80px;
+}
+header {
+    padding: 5px 10px;
+    border-bottom: 1px solid #cbcbcb;
 }

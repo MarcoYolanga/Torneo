@@ -4,7 +4,7 @@ var glo = {
     saveFile: null,
     setSaveFile: (val) => {
         glo.saveFile = val;
-        if(val){
+        if (val) {
             $('#save-path').text(val);
         } else {
             $('#save-path').text('');
@@ -20,23 +20,23 @@ var glo = {
             glo.squadre.render();
             glo.torneo.load();
         },
-        save: function() {
+        save: function () {
             window.localAPI.saveFile(glo.saveFile, _json_encode(this.data));
         },
         val: function (k, v) {
-            if(v === undefined){
+            if (v === undefined) {
                 return this.data[k];
             }
             this.data[k] = v;
             this.save();
         },
         progressivo: function (k) {
-            let prev = this.val('progressivo-'+k);
-            if(!prev){
+            let prev = this.val('progressivo-' + k);
+            if (!prev) {
                 prev = 0;
             }
-            this.val('progressivo-'+k, prev+1);
-            return prev+1;
+            this.val('progressivo-' + k, prev + 1);
+            return prev + 1;
         }
     },
     squadre: {
@@ -44,26 +44,36 @@ var glo = {
         table: null,
         listCache: null,
         add: function (squadra) {
-            //TODO: check dupl
+
+            if (!squadra.id){
+                const squadre = this.list();
+                for (const _squadraId in squadre) {
+                    const _squadra = squadre[_squadraId];
+                    if (_squadra.nome === squadra.nome) {
+                        throw new Error("Squadra duplicata");
+                    }
+                }
+            }
+
             console.log('adding ', squadra);
-            const row = $('<tr><td>'+squadra.nome+'</td><td><button class="btn btn-danger btn-sm btn-delete">X</button></td></tr>');
-            if(!squadra.id){
+            const row = $('<tr><td><span class="squadra badge bg-secondary">' + squadra.nome + '</span></td><td><button class="btn btn-danger btn-sm btn-delete">X</button></td></tr>');
+            if (!squadra.id) {
                 squadra.id = glo.db.progressivo('squadre');
             }
             row.data('squadra', squadra);
             this.table.find('tbody').append(row);
-            row.find('.btn-delete', function(){
-                $(this).closest('tr').delete();
+            row.find('.btn-delete').on('click', function () {
+                $(this).closest('tr').remove();
                 glo.squadre.save();
             });
         },
         render: function () {
             const squadre = this.val();
             this.table.find("tbody tr").remove();
-            for(const squadra of squadre){
+            for (const squadra of squadre) {
                 this.add(squadra);
             }
-            
+
         },
         save: function () {
             this.val(this.read());
@@ -71,23 +81,23 @@ var glo = {
         },
         read: function () {
             let data = [];
-            this.table.find('tbody tr').each(function(){
+            this.table.find('tbody tr').each(function () {
                 const row = $(this);
                 data.push(row.data('squadra'));
             });
             return data;
         },
-        val: function(setVal) {
-            if(setVal === undefined){
+        val: function (setVal) {
+            if (setVal === undefined) {
                 return _json_decode(glo.db.val('squadre'), []);
             }
             glo.db.val('squadre', _json_encode(setVal));
         },
-        list: function(){
-            if(!this.listCache){
+        list: function () {
+            if (!this.listCache) {
                 const squadre = this.val();
                 let map = {};
-                for(const squadra of squadre){
+                for (const squadra of squadre) {
                     map[squadra.id] = squadra;
                 }
                 this.listCache = map;
@@ -98,24 +108,25 @@ var glo = {
     torneo: {
         fasi: ['gironi-andata', 'gironi-ritorno', 'eliminatorie'],
         data: {},
-        val: function(setVal) {
-            if(setVal === undefined){
+        val: function (setVal) {
+            if (setVal === undefined) {
                 return _json_decode(glo.db.val('torneo'));
             }
             glo.db.val('torneo', _json_encode(setVal));
         },
-        start: function() {
+        start: function () {
             this.data = {
                 options: {},
                 partite: [], //indexFase => [partite]
             };
             const formOptions = this.nodes.startTorneo.read();
-            if(!formOptions.gironi){
-                throw new Error("Can't start torneo without config");
+            if (!formOptions.gironi) {
+                console.error("Can't start torneo without config");
+                return;
             }
             this.data.options = formOptions;
             this.setFase(0);
-            
+
             //dividi i gironi
             const squadre = glo.squadre.list()
             const nSquadre = Object.keys(squadre).length;
@@ -123,21 +134,21 @@ var glo = {
             const nPerGirone = Math.floor(nSquadre / nGironi);
             this.data.gironi = [];
             let indexGirone = 0;
-            for(const idSquadra in squadre){
+            for (const idSquadra in squadre) {
                 const squadra = squadre[idSquadra];
-                if(!this.data.gironi[indexGirone]){
+                if (!this.data.gironi[indexGirone]) {
                     this.data.gironi[indexGirone] = [];
                 }
                 this.data.gironi[indexGirone].push(squadra);
-                if(this.data.gironi[indexGirone].length >= nPerGirone){
+                if (this.data.gironi[indexGirone].length >= nPerGirone) {
                     indexGirone++;
                 }
             }
             //se l'ultimo girone è meno del necessario spalma i giocatori
-            if(this.data.gironi[this.data.gironi.length - 1].length < nPerGirone){
+            if (this.data.gironi[this.data.gironi.length - 1].length < nPerGirone) {
                 let girone = this.data.gironi.pop();
                 indexGirone = 0;
-                for(const squadra of girone){
+                for (const squadra of girone) {
                     this.data.gironi[indexGirone % this.data.gironi.length].push(squadra);
                     indexGirone++;
                 }
@@ -147,13 +158,13 @@ var glo = {
             this.render();
             this.save();
         },
-        setFase: function(indexFase){
+        setFase: function (indexFase) {
             this.data.step = 0;
             this.data.fase = indexFase;
         },
-        load: function (){
+        load: function () {
             this.data = this.val();
-            if(typeof this.data.step === 'undefined'){
+            if (typeof this.data.step === 'undefined') {
                 console.error("Loaded invalid torneo data");
                 this.start();
                 return;
@@ -163,16 +174,17 @@ var glo = {
 
             this.render();
         },
-        render: function(){
+        render: function () {
             //stato base dei gironi
             this.nodes.renderGironi.html("");
-            for(const girone of this.data.gironi){
+            for (const girone of this.data.gironi) {
                 const col = $('<div class="col-12 col-md-3"></div>');
+                //TODO: use a card
                 const item = $('<div class="girone"><div class="classifica"></div><div class="match"></div></div>');
                 const classifica = item.find('.classifica');
                 const match = item.find('.match');
-                for(const squadra of girone){
-                    const squadraNode = $('<div data-id="'+squadra.id+'" class="squadra badge bg-secondary">'+squadra.nome+'</div>');
+                for (const squadra of girone) {
+                    const squadraNode = $('<div data-id="' + squadra.id + '" class="squadra badge bg-secondary">' + squadra.nome + '</div>');
                     classifica.append(squadraNode);
                 }
 
@@ -180,10 +192,10 @@ var glo = {
                 this.nodes.renderGironi.append(col);
             }
         },
-        save: function(){
+        save: function () {
             this.val(this.data);
         },
-        init: function(tab){
+        init: function (tab) {
             this.nodes = {
                 tab: $(tab)
             };
@@ -191,37 +203,61 @@ var glo = {
             this.nodes.faseEliminatorie = this.nodes.tab.find('.fase-eliminatorie');
             this.nodes.renderGironi = this.nodes.tab.find('.fase-gironi .render-gironi');
             this.nodes.startTorneo = FormController('#start-torneo');
-            
+
             const torneo = this;
-            this.nodes.startTorneo.el.on('submit', function(){
+            this.nodes.startTorneo.el.on('submit', function () {
                 torneo.start();
             });
-            
+
         }
     }
 
 };
 window.addEventListener('load', () => {
+    uncaught.start();
+    uncaught.addListener(function (error) {
+        let errorParts = error.stack.split('\n');
+        toastr.error("<b>" + errorParts.shift() + "</b>\n" + errorParts.join("\n"));
+    });
+
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "10000",
+        "extendedTimeOut": "15000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+      };
+
     rlib.setPage('select-save');
 
     glo.squadre.table = $('#squadre');
     glo.squadre.form = FormController('#add-squadra');
-    glo.squadre.form.el.on('submit', function(){
+    glo.squadre.form.el.on('submit', function () {
         glo.squadre.add(glo.squadre.form.read());
         glo.squadre.save();
         glo.squadre.form.el[0].reset();
     });
 
     glo.torneo.init('#torneo');
-    
+
 
     let page = $('.page[data-page="select-save"]');
     page.find('.btn-newfile').on('click', async function () {
-        
+
         let defaultFilePath = glo.saveFile;
 
-        if(!defaultFilePath){
-            defaultFilePath ="";
+        if (!defaultFilePath) {
+            defaultFilePath = "";
         }
         const savePathSelection = await window.localAPI.choseSaveAs(defaultFilePath);
         if (!savePathSelection) {
@@ -238,7 +274,7 @@ window.addEventListener('load', () => {
     });
 
     page.find('.btn-loadfile').on('click', async function () {
-        
+
 
         const savePathSelection = await window.localAPI.openFile();
         if (!savePathSelection) {
@@ -249,7 +285,7 @@ window.addEventListener('load', () => {
             console.error("Save as path selection error: no path was returned by the system");
             return;
         }
-       
+
         glo.setSaveFile(savePathSelection.filePath);
         console.log("CONTENT", savePathSelection);
         glo.db.load(savePathSelection.fileContent);
