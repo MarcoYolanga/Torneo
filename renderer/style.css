@@ -109,9 +109,13 @@ body.drag-and-drop-overlay-visible #drag-and-drop-overlay{
     display: block;
     margin: 3px 10px;
     white-space: normal;
+    overflow: hidden;
     min-width: 80px;
 }
 header {
     padding: 5px 10px;
     border-bottom: 1px solid #cbcbcb;
+}
+.girone {
+    margin-bottom: 20px;
 }

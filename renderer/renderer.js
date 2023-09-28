@@ -45,7 +45,7 @@ var glo = {
         listCache: null,
         add: function (squadra) {
 
-            if (!squadra.id){
+            if (!squadra.id) {
                 const squadre = this.list();
                 for (const _squadraId in squadre) {
                     const _squadra = squadre[_squadraId];
@@ -129,7 +129,8 @@ var glo = {
 
             //dividi i gironi
             const squadre = glo.squadre.list()
-            const nSquadre = Object.keys(squadre).length;
+            const squadreIds = Object.keys(squadre);
+            const nSquadre = squadreIds.length;
             const nGironi = parseInt(this.data.options.gironi);
             const nPerGirone = Math.floor(nSquadre / nGironi);
             this.data.gironi = [];
@@ -154,6 +155,22 @@ var glo = {
                 }
             }
 
+            //Genera partite
+            //https://sites.google.com/site/wikiofe/organizzare-un-torneo#h.61hlx1kl4u5g
+            let partite = {}; //{indexGirone : [partite]}
+            let codaSquadre = squadreIds;
+            if (codaSquadre % 2 !== 0) {
+                codaSquadre.unshift(null);
+            }
+            //La prima squadra è fissa le altre girano
+            const nLoops = codaSquadre.length - 1;
+            for ($i = 0; $i < nLoops; $i++) {
+                //TODO: prendi abbinamenti
+
+                //TODO: ruota
+            }
+
+            this.data.partite = partite;
 
             this.render();
             this.save();
@@ -177,10 +194,14 @@ var glo = {
         render: function () {
             //stato base dei gironi
             this.nodes.renderGironi.html("");
+            let indexGirone = 1;
             for (const girone of this.data.gironi) {
                 const col = $('<div class="col-12 col-md-3"></div>');
-                //TODO: use a card
-                const item = $('<div class="girone"><div class="classifica"></div><div class="match"></div></div>');
+
+
+                //TODO: use this.data.partite
+                const partite = '<div class="partite"></div>';
+                const item = $('<div class="girone card"><div class="card-header">Girone ' + indexGirone + '</div><div class="card-body"><div class="classifica"></div><hr>' + partite + '</div></div>');
                 const classifica = item.find('.classifica');
                 const match = item.find('.match');
                 for (const squadra of girone) {
@@ -190,6 +211,7 @@ var glo = {
 
                 col.append(item);
                 this.nodes.renderGironi.append(col);
+                indexGirone++;
             }
         },
         save: function () {
@@ -236,7 +258,7 @@ window.addEventListener('load', () => {
         "hideEasing": "linear",
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
-      };
+    };
 
     rlib.setPage('select-save');
 
