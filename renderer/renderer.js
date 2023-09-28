@@ -120,6 +120,7 @@ var glo = {
                 options: {},
                 partite: [], //indexFase => [partite]
             };
+            this.kdaCache = {};
             const formOptions = this.nodes.startTorneo.read();
             if (!formOptions.gironi) {
                 console.error("Can't start torneo without config");
@@ -224,12 +225,13 @@ var glo = {
             //stato base dei gironi
             this.nodes.renderGironi.html("");
             let indexGirone = 0;
-            for (const girone of this.data.gironi) {
+            for (let girone of this.data.gironi) {
                 const col = $('<div class="col-12 col-md-3"></div>');
                 const item = $('<div class="girone card"><div class="card-header">Girone ' + (indexGirone + 1) + '</div><div class="card-body"><div class="classifica"></div><hr><div class="partite"></div></div></div>');
                 const classifica = item.find('.classifica');
                 const partite = item.find('.partite');
 
+                glo.sortClassifica(girone);
                 for (const squadra of girone) {
                     const squadraNode = glo.renderSquadraBadge(squadra);
                     classifica.append(squadraNode);
@@ -319,7 +321,7 @@ var glo = {
     kdaCache: {},
     getKda: function (squadra) {
         if (typeof this.kdaCache[squadra.id] !== 'undefined') {
-            return this.kdaCache[squadra.id];
+            return Object.assign({}, this.kdaCache[squadra.id]);
         }
         let kda = {
             segnati: 0,
@@ -339,6 +341,7 @@ var glo = {
                             kda.segnati += partita.risultato[squadraIndexInPartita];
                             kda.subiti += partita.risultato[avversarioIndexInPartita];
                             if (partita.risultato[squadraIndexInPartita] > partita.risultato[avversarioIndexInPartita]) {
+                                console.log(partita, 'vinta da ', squadra);
                                 kda.punti += 2;
                             }
                         }
@@ -348,14 +351,7 @@ var glo = {
             indexGirone++;
         }
 
-
-        if ((kda.segnati + kda.subiti + kda.punti) == 0) {
-            kda = null;
-        }
-
-        this.kdaCache[squadra.id] = kda;
-
-
+        this.kdaCache[squadra.id] = Object.assign({}, kda);
         return kda;
     },
     setPage: (page) => {
@@ -375,11 +371,12 @@ var glo = {
     renderSquadraBadge: (squadra) => {
         const kda = glo.getKda(squadra);
         let kdaHTML = "";
-        if (kda !== null) {
+        if ((kda.segnati + kda.subiti + kda.punti) > 0) {
             kdaHTML += "<span class='kda'>";
+            kdaHTML += "<span class='text-primary'>" + kda.punti + "</span>/";
             kdaHTML += "<span class='text-success'>" + kda.segnati + "</span>/";
-            kdaHTML += "<span class='text-danger'>" + kda.subiti + "</span>/";
-            kdaHTML += "<span class='text-primary'>" + kda.punti + "</span>";
+            kdaHTML += "<span class='text-danger'>" + kda.subiti + "</span>";
+            
             kdaHTML += "</span>";
         }
 
@@ -388,10 +385,35 @@ var glo = {
     containsSquadra: (partita, squadra) => {
         for (const i in partita.squadre) {
             if (partita.squadre[i].id == squadra.id) {
-                return i;
+                return parseInt(i);
             }
         }
         return false;
+    },
+    sortClassifica: (squadre) => {
+        squadre.sort((a, b) => {
+            const aKda = glo.getKda(a);
+            const bKda = glo.getKda(b);
+            if(aKda.punti > bKda.punti){
+                return -1;
+            }
+            if(aKda.punti < bKda.punti){
+                return 1;
+            }
+            if(aKda.segnati > bKda.segnati){
+                return -1;
+            }
+            if(aKda.segnati < bKda.segnati){
+                return 1;
+            }
+            if(aKda.subiti < bKda.subiti){
+                return -1;
+            }
+            if(aKda.subiti > bKda.subiti){
+                return 1;
+            }
+            return 0;
+        });
     }
 
 };
