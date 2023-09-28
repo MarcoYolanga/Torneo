@@ -22,6 +22,7 @@ var glo = {
         },
         save: function () {
             window.localAPI.saveFile(glo.saveFile, _json_encode(this.data));
+            glo.kdaCache = {};
         },
         val: function (k, v) {
             if (v === undefined) {
@@ -174,7 +175,7 @@ var glo = {
                         };
                         let found = false;
                         for (const partita of partite[indexGirone]) {
-                            if (rlib.isSamePartita(partita, newPartita)) {
+                            if (glo.isSamePartita(partita, newPartita)) {
                                 found = true;
                                 break;
                             }
@@ -192,7 +193,7 @@ var glo = {
                     partita.isRitorno = true;
                     return partita;
                 }));
-                
+
             }
 
 
@@ -225,27 +226,23 @@ var glo = {
             let indexGirone = 0;
             for (const girone of this.data.gironi) {
                 const col = $('<div class="col-12 col-md-3"></div>');
-
-
-
-
                 const item = $('<div class="girone card"><div class="card-header">Girone ' + (indexGirone + 1) + '</div><div class="card-body"><div class="classifica"></div><hr><div class="partite"></div></div></div>');
                 const classifica = item.find('.classifica');
                 const partite = item.find('.partite');
 
                 for (const squadra of girone) {
-                    const squadraNode = rlib.renderSquadraBadge(squadra);
+                    const squadraNode = glo.renderSquadraBadge(squadra);
                     classifica.append(squadraNode);
                 }
 
                 if (this.data.partite[indexGirone]) {
                     for (const partita of this.data.partite[indexGirone]) {
-                        const isGiocata = rlib.isGiocata(partita);
+                        const isGiocata = glo.isGiocata(partita);
                         const partitaNode = $("<div class='partita'><div class='vs'></div><div class='risultato'></div></div>");
                         const vsNode = partitaNode.find('.vs');
-                        vsNode.append(rlib.renderSquadraBadge(partita.squadre[0]));
+                        vsNode.append(glo.renderSquadraBadge(partita.squadre[0]));
                         vsNode.append("<h6>VS</h6>");
-                        vsNode.append(rlib.renderSquadraBadge(partita.squadre[1]));
+                        vsNode.append(glo.renderSquadraBadge(partita.squadre[1]));
                         const risultatoNode = partitaNode.find('.risultato');
                         risultatoNode.text(partita.risultato.join("-"));
                         if (isGiocata) {
@@ -293,28 +290,108 @@ var glo = {
 
         }
     },
-    giocaPartita: function(partita){
+    giocaPartita: function (partita) {
         const modal = $('#gioca');
         const form = modal.find('form');
+        const controls = [form.find('.form-control[name="squadra1"]'), form.find('.form-control[name="squadra2"]')];
         form.find('label[for="squadra1"]').text(partita.squadre[0].nome);
         form.find('label[for="squadra2"]').text(partita.squadre[1].nome);
-        form.find('.form-control').val("");
+        controls[0].val(partita.risultato[0]);
+        controls[1].val(partita.risultato[1]);
         form.off('submit');
         form.on('submit', () => {
-            partita.risultato[0] = parseInt(form.find('.form-control[name="squadra1"]').val());
-            partita.risultato[1] = parseInt(form.find('.form-control[name="squadra2"]').val());
-            
+            partita.risultato[0] = parseInt(controls[0].val());
+            partita.risultato[1] = parseInt(controls[1].val());
+
             glo.torneo.save();
             glo.torneo.render();
             modal.modal('hide');
         });
         modal.modal('show');
-        if(!modal.hasClass("js-inited")){
-            modal.on('shown.bs.modal', function(){
-                form.find('.form-control[name="squadra1"]')[0].focus();
+        if (!modal.hasClass("js-inited")) {
+            modal.on('shown.bs.modal', function () {
+                controls[0][0].focus();
+                controls[0][0].select();
             });
             modal.addClass("js-inited");
         }
+    },
+    kdaCache: {},
+    getKda: function (squadra) {
+        if (typeof this.kdaCache[squadra.id] !== 'undefined') {
+            return this.kdaCache[squadra.id];
+        }
+        let kda = {
+            segnati: 0,
+            subiti: 0,
+            punti: 0,
+        };
+
+        let indexGirone = 0;
+        for (const girone of this.torneo.data.gironi) {
+
+            if (this.torneo.data.partite[indexGirone]) {
+                for (const partita of this.torneo.data.partite[indexGirone]) {
+                    if (glo.isGiocata(partita)) {
+                        const squadraIndexInPartita = glo.containsSquadra(partita, squadra);
+                        if (squadraIndexInPartita !== false) {
+                            const avversarioIndexInPartita = (squadraIndexInPartita + 1) % 2;
+                            kda.segnati += partita.risultato[squadraIndexInPartita];
+                            kda.subiti += partita.risultato[avversarioIndexInPartita];
+                            if (partita.risultato[squadraIndexInPartita] > partita.risultato[avversarioIndexInPartita]) {
+                                kda.punti += 2;
+                            }
+                        }
+                    }
+                }
+            }
+            indexGirone++;
+        }
+
+
+        if ((kda.segnati + kda.subiti + kda.punti) == 0) {
+            kda = null;
+        }
+
+        this.kdaCache[squadra.id] = kda;
+
+
+        return kda;
+    },
+    setPage: (page) => {
+        $('.page').removeClass('show');
+        $('.page[data-page="' + page + '"]').addClass('show');
+    },
+    getPage: () => {
+        return $('.page.show').data('page');
+    },
+    isSamePartita: (a, b) => {
+        return (a.squadre[0] === b.squadre[0] && a.squadre[1] === b.squadre[1])
+            || (a.squadre[1] === b.squadre[0] && a.squadre[0] === b.squadre[1]);
+    },
+    isGiocata: (partita) => {
+        return (partita.risultato[0] + partita.risultato[1]) > 0;
+    },
+    renderSquadraBadge: (squadra) => {
+        const kda = glo.getKda(squadra);
+        let kdaHTML = "";
+        if (kda !== null) {
+            kdaHTML += "<span class='kda'>";
+            kdaHTML += "<span class='text-success'>" + kda.segnati + "</span>/";
+            kdaHTML += "<span class='text-danger'>" + kda.subiti + "</span>/";
+            kdaHTML += "<span class='text-primary'>" + kda.punti + "</span>";
+            kdaHTML += "</span>";
+        }
+
+        return $('<div data-id="' + squadra.id + '" class="squadra badge bg-secondary">' + squadra.nome + kdaHTML + '</div>');
+    },
+    containsSquadra: (partita, squadra) => {
+        for (const i in partita.squadre) {
+            if (partita.squadre[i].id == squadra.id) {
+                return i;
+            }
+        }
+        return false;
     }
 
 };
@@ -343,7 +420,7 @@ window.addEventListener('load', () => {
         "hideMethod": "fadeOut"
     };
 
-    rlib.setPage('select-save');
+    glo.setPage('select-save');
 
     glo.squadre.table = $('#squadre');
     glo.squadre.form = FormController('#add-squadra');
@@ -375,7 +452,7 @@ window.addEventListener('load', () => {
         }
         glo.setSaveFile(savePathSelection.filePath);
         glo.db.load("{}");
-        rlib.setPage('game');
+        glo.setPage('game');
     });
 
     page.find('.btn-loadfile').on('click', async function () {
@@ -394,12 +471,12 @@ window.addEventListener('load', () => {
         glo.setSaveFile(savePathSelection.filePath);
         //console.log("CONTENT", savePathSelection);
         glo.db.load(savePathSelection.fileContent);
-        rlib.setPage('game');
+        glo.setPage('game');
     });
 
     page = $('.page[data-page="game"]');
     page.find('.btn-close-file').on('click', function () {
         glo.setSaveFile(null);
-        rlib.setPage('select-save');
+        glo.setPage('select-save');
     });
 });

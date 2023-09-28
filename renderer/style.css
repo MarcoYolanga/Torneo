@@ -129,3 +129,6 @@ header {
 .partita.di-ritorno{
     border-color: #4356b3;
 }
+.kda{
+    white-space: nowrap;
+}

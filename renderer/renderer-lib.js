@@ -1,22 +1,4 @@
-var rlib = {
-	setPage: (page) => {
-		$('.page').removeClass('show');
-		$('.page[data-page="' + page + '"]').addClass('show');
-	},
-	getPage: () => {
-		return $('.page.show').data('page');
-	},
-	isSamePartita: (a, b) => {
-		return (a.squadre[0] === b.squadre[0] && a.squadre[1] === b.squadre[1])
-			|| (a.squadre[1] === b.squadre[0] && a.squadre[0] === b.squadre[1]);
-	},
-	isGiocata: (partita) => {
-		return (partita.risultato[0] + partita.risultato[1]) > 0;
-	},
-	renderSquadraBadge: (squadra) => {
-		return $('<div data-id="' + squadra.id + '" class="squadra badge bg-secondary">' + squadra.nome + '</div>');
-	}
-};
+
 function _json_decode(str, def = {}) {
 	if (str === undefined || str === null)
 		return def;
