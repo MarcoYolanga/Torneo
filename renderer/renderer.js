@@ -13,7 +13,7 @@ var glo = {
     db: {
         data: {},
         load: function (data) {
-            console.log('json parse', data, _json_decode(data));
+            //console.log('json parse', data, _json_decode(data));
             this.data = _json_decode(data);
             this.val('last-open', millis());
 
@@ -55,7 +55,7 @@ var glo = {
                 }
             }
 
-            console.log('adding ', squadra);
+            //console.log('adding ', squadra);
             const row = $('<tr><td><span class="squadra badge bg-secondary">' + squadra.nome + '</span></td><td><button class="btn btn-danger btn-sm btn-delete">X</button></td></tr>');
             if (!squadra.id) {
                 squadra.id = glo.db.progressivo('squadre');
@@ -106,7 +106,7 @@ var glo = {
         },
     },
     torneo: {
-        fasi: ['gironi-andata', 'gironi-ritorno', 'eliminatorie'],
+        fasi: ['gironi', 'eliminatorie'],
         data: {},
         val: function (setVal) {
             if (setVal === undefined) {
@@ -156,19 +156,47 @@ var glo = {
             }
 
             //Genera partite
-            //https://sites.google.com/site/wikiofe/organizzare-un-torneo#h.61hlx1kl4u5g
             let partite = {}; //{indexGirone : [partite]}
-            let codaSquadre = squadreIds;
-            if (codaSquadre % 2 !== 0) {
-                codaSquadre.unshift(null);
-            }
-            //La prima squadra è fissa le altre girano
-            const nLoops = codaSquadre.length - 1;
-            for ($i = 0; $i < nLoops; $i++) {
-                //TODO: prendi abbinamenti
 
-                //TODO: ruota
+            for (const indexGirone in this.data.gironi) {
+                const girone = this.data.gironi[indexGirone];
+                partite[indexGirone] = [];
+                for (const squadra1 of girone) {
+                    for (const squadra2 of girone) {
+                        if (squadra1 === squadra2) {
+                            continue;
+                        }
+                        //check existance
+                        const newPartita = {
+                            squadre: [squadra1, squadra2],
+                            risultato: [0, 0],
+                            isRitorno: false
+                        };
+                        let found = false;
+                        for (const partita of partite[indexGirone]) {
+                            if (rlib.isSamePartita(partita, newPartita)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            partite[indexGirone].push(newPartita);
+                        }
+                    }
+                }
+
+                //Ritorno
+                partite[indexGirone] = partite[indexGirone].concat(partite[indexGirone].map((partita) => {
+                    partita = _json_clone(partita);
+                    partita.squadre.reverse();
+                    partita.isRitorno = true;
+                    return partita;
+                }));
+                
             }
+
+
+
 
             this.data.partite = partite;
 
@@ -194,20 +222,52 @@ var glo = {
         render: function () {
             //stato base dei gironi
             this.nodes.renderGironi.html("");
-            let indexGirone = 1;
+            let indexGirone = 0;
             for (const girone of this.data.gironi) {
                 const col = $('<div class="col-12 col-md-3"></div>');
 
 
-                //TODO: use this.data.partite
-                const partite = '<div class="partite"></div>';
-                const item = $('<div class="girone card"><div class="card-header">Girone ' + indexGirone + '</div><div class="card-body"><div class="classifica"></div><hr>' + partite + '</div></div>');
+
+
+                const item = $('<div class="girone card"><div class="card-header">Girone ' + (indexGirone + 1) + '</div><div class="card-body"><div class="classifica"></div><hr><div class="partite"></div></div></div>');
                 const classifica = item.find('.classifica');
-                const match = item.find('.match');
+                const partite = item.find('.partite');
+
                 for (const squadra of girone) {
-                    const squadraNode = $('<div data-id="' + squadra.id + '" class="squadra badge bg-secondary">' + squadra.nome + '</div>');
+                    const squadraNode = rlib.renderSquadraBadge(squadra);
                     classifica.append(squadraNode);
                 }
+
+                if (this.data.partite[indexGirone]) {
+                    for (const partita of this.data.partite[indexGirone]) {
+                        const isGiocata = rlib.isGiocata(partita);
+                        const partitaNode = $("<div class='partita'><div class='vs'></div><div class='risultato'></div></div>");
+                        const vsNode = partitaNode.find('.vs');
+                        vsNode.append(rlib.renderSquadraBadge(partita.squadre[0]));
+                        vsNode.append("<h6>VS</h6>");
+                        vsNode.append(rlib.renderSquadraBadge(partita.squadre[1]));
+                        const risultatoNode = partitaNode.find('.risultato');
+                        risultatoNode.text(partita.risultato.join("-"));
+                        if (isGiocata) {
+                            risultatoNode.addClass('text-primary');
+                        } else {
+                            risultatoNode.addClass('text-muted');
+                        }
+                        if (partita.isRitorno) {
+                            partitaNode.addClass('di-ritorno');
+                        }
+
+
+                        partite.append(partitaNode);
+                        partitaNode.data('partita', partita);
+                        partitaNode.on('click', () => {
+                            glo.giocaPartita(partita);
+                        });
+                    }
+                } else {
+                    console.error("Nessuna partita per il girone " + indexGirone);
+                }
+
 
                 col.append(item);
                 this.nodes.renderGironi.append(col);
@@ -231,6 +291,29 @@ var glo = {
                 torneo.start();
             });
 
+        }
+    },
+    giocaPartita: function(partita){
+        const modal = $('#gioca');
+        const form = modal.find('form');
+        form.find('label[for="squadra1"]').text(partita.squadre[0].nome);
+        form.find('label[for="squadra2"]').text(partita.squadre[1].nome);
+        form.find('.form-control').val("");
+        form.off('submit');
+        form.on('submit', () => {
+            partita.risultato[0] = parseInt(form.find('.form-control[name="squadra1"]').val());
+            partita.risultato[1] = parseInt(form.find('.form-control[name="squadra2"]').val());
+            
+            glo.torneo.save();
+            glo.torneo.render();
+            modal.modal('hide');
+        });
+        modal.modal('show');
+        if(!modal.hasClass("js-inited")){
+            modal.on('shown.bs.modal', function(){
+                form.find('.form-control[name="squadra1"]')[0].focus();
+            });
+            modal.addClass("js-inited");
         }
     }
 

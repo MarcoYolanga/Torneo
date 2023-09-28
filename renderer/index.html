@@ -66,7 +66,7 @@
             </thead> -->
             <tbody></tbody>
           </table>
-          
+
         </div>
         <div class="tab-pane fade" id="torneo" role="tabpanel" aria-labelledby="torneo-tab">
           <form id="start-torneo" action="#" onsubmit="return false">
@@ -87,7 +87,7 @@
               </div>
             </div>
             <div class="fase-eliminatorie">
-              
+
             </div>
           </div>
         </div>
@@ -97,6 +97,33 @@
     </div>
 
 
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="gioca" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="giocaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="modal-content" action="#" onsubmit="return false">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="giocaLabel">Partita</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+              <label class="squadra badge bg-secondary" for="squadra1"></label>
+              <input id="squadra1" type="number" name="squadra1" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="squadra badge bg-secondary" for="squadra2"></label>
+              <input id="squadra2" type="number" name="squadra2" class="form-control" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button type="submit" class="btn btn-primary">Conferma</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="./jquery-3.7.0.min.js"></script>
